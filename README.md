@@ -2,7 +2,14 @@
 
 ## CMDs
 
+ping
+
 ```bash
-ansible aws
+ansible aws -i hosts -m ping
 ```
 
+install and start nginx from hosts file
+
+```bash
+ansible-playbook -i hosts playbooks/nginx.yaml
+```
