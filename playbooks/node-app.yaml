@@ -1,0 +1,52 @@
+---
+- name: Install Node.js
+  hosts: aws
+  become: true
+  tasks:
+
+    - name: Update apt cache
+      apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+
+    - name: Install Node.js and npm
+      apt:
+        pkg:
+          - nodejs
+          - npm
+
+- name: Create new linux user for node app
+  hosts: aws
+  tasks:
+    - name: Create linux user
+      user:
+      # replace with your username
+        name: tony
+        comment: Node User
+        group: admin
+
+ 
+- name: Deploy NodeJS App
+  hosts: aws
+  become: True
+  become_user: tony
+  tasks:
+
+    - name: Unarchive app files
+      unarchive:
+        src: /Users/tonyrudny/Developer/DevOps/techdegree-with-nana/15_ansible/node-app/nodeserver-0.0.0.tgz
+        dest: /home/tony
+
+    - name: Install app dependencies
+      npm:
+        path: /home/tony/package
+
+    - name: Start the app
+      command:
+        chdir: /home/tony/package/src/server
+        cmd: node app.js
+      async: 1000
+      poll: 0
+    
+    - name: Wait for the app to start
+      shell: ps aux | grep node
+      register: result
+    - debug: msg="{{ result.stdout_lines }}"
