@@ -22,22 +22,26 @@
 
 - name: Create new linux user for node app
   hosts: aws
+  become: true
+  vars_files:
+    - vars
   tasks:
     - name: Create linux user
       user:
       # replace with your username
-        name: tony
+        name: "{{ node_user }}"
         comment: Node User
         group: admin
+        password: "{{ node_user_password | password_hash('sha512') }}"
  
 - name: Deploy NodeJS App
   hosts: aws
   become: True
-  become_user: tony
+  become_user: "{{ node_user }}"
+  vars_files:
+    - vars
   vars:
-    node_app_dir: /Users/tonyrudny/Developer/DevOps/techdegree-with-nana/15_ansible
-    app_version: 0.0.0
-    app_dest_dir: /home/tony
+    user_home_dir: "/home/{{ node_user }}"
 
   tasks:
 
@@ -45,15 +49,15 @@
       unarchive:
         # /Users/tonyrudny/Developer/DevOps/techdegree-with-nana/15_ansible/node-app/nodeserver-0.0.0.tgz
         src: "{{ node_app_dir }}/node-app/nodeserver-{{app_version}}.tgz" 
-        dest: "{{app_dest_dir}}"
+        dest: "{{user_home_dir}}"
 
     - name: Install app dependencies
       npm:
-        path: "{{app_dest_dir}}/package"
+        path: "{{user_home_dir}}/package"
 
     - name: Start the app
       command:
-        chdir: "{{app_dest_dir}}/package/src/server"
+        chdir: "{{user_home_dir}}/package/src/server"
         cmd: node app.js
       async: 1000
       poll: 0
