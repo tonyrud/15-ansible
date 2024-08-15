@@ -5,21 +5,25 @@
 ping
 
 ```bash
-ansible aws -i hosts -m ping
+make ping
 ```
 
 install and start nginx from hosts file
 
 ```bash
-ansible-playbook -i hosts playbooks/nginx.yaml
+make nginx
 ```
 
 Start node app on hosts
 
-package node app: `cd node-app && npm pack`
+package node app:
 
 ```bash
-ansible-playbook -i hosts playbooks/node-app.yaml
+make build_app
+```
+
+```bash
+make deploy_app
 ```
 
 See running app:

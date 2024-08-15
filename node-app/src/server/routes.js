@@ -9,9 +9,12 @@ var appVersion = module.exports.version;
  * CORS support
  * Customize that according to your client app requirements
  */
-router.use(function(req, res, next) {
+router.use(function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept',
+  );
   next();
 });
 
@@ -29,14 +32,14 @@ function status(req, res) {
     app: appName,
     version: appVersion,
     status: 200,
-    message: 'OK - ' + Math.random().toString(36).substr(3, 8)
+    message: 'OK - ' + Math.random().toString(36).substr(3, 8),
   };
 
   res.status(200).send(data);
 }
 
 function home(req, res) {
-  res.status(200).send('Hello there!');
+  res.status(200).send(`Hello there! App: ${appName} v${appVersion}`);
 }
 
 function healthCheck(req, res) {

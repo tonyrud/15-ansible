@@ -29,26 +29,31 @@
         name: tony
         comment: Node User
         group: admin
-
  
 - name: Deploy NodeJS App
   hosts: aws
   become: True
   become_user: tony
+  vars:
+    node_app_dir: /Users/tonyrudny/Developer/DevOps/techdegree-with-nana/15_ansible
+    app_version: 0.0.0
+    app_dest_dir: /home/tony
+
   tasks:
 
     - name: Unarchive app files
       unarchive:
-        src: /Users/tonyrudny/Developer/DevOps/techdegree-with-nana/15_ansible/node-app/nodeserver-0.0.0.tgz
-        dest: /home/tony
+        # /Users/tonyrudny/Developer/DevOps/techdegree-with-nana/15_ansible/node-app/nodeserver-0.0.0.tgz
+        src: "{{ node_app_dir }}/node-app/nodeserver-{{app_version}}.tgz" 
+        dest: "{{app_dest_dir}}"
 
     - name: Install app dependencies
       npm:
-        path: /home/tony/package
+        path: "{{app_dest_dir}}/package"
 
     - name: Start the app
       command:
-        chdir: /home/tony/package/src/server
+        chdir: "{{app_dest_dir}}/package/src/server"
         cmd: node app.js
       async: 1000
       poll: 0
