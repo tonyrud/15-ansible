@@ -8,11 +8,15 @@ ping
 make ping
 ```
 
+### Nginx
+
 install and start nginx from hosts file
 
 ```bash
 make nginx
 ```
+
+### Node App
 
 Start node app on hosts
 
@@ -29,3 +33,9 @@ make deploy_app
 See running app:
 
 `<public-dns>:8009/api`
+
+### Nexus
+
+```bash
+make deploy_nexus
+```

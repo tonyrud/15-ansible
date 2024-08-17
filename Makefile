@@ -8,6 +8,9 @@ nginx:
 build_app:
 	cd node-app && npm pack
 
-deploy_app: build_app
+deploy_node_app: build_app
 	ansible-playbook -i hosts playbooks/node-app.yaml
+
+deploy_nexus:
+	ansible-playbook playbooks/nexus.yaml
 

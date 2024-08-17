@@ -1,0 +1,123 @@
+---
+- name: Install Java and net-tools
+  hosts: aws
+  become: true
+  tasks:
+
+    - name: Update apt cache
+      apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+
+    - name: apt get java
+      apt: name=openjdk-17-jre-headless
+
+    - name: apt get net-tools
+      apt: name=net-tools
+
+- name: Install Nexus
+  hosts: aws
+  become: true
+  tasks:
+    - name: Check if nexus directory exists
+      stat: path=/opt/nexus
+      register: stat_result
+    - debug: msg="{{ stat_result }}"
+
+    - name: Download Nexus
+      get_url:
+        url: https://download.sonatype.com/nexus/3/latest-unix.tar.gz
+        dest: /opt/
+      register: download_nexus
+      when: not stat_result.stat.exists
+    # - debug: msg="{{ download_nexus }}"
+
+
+    - name: Unarchive app files
+      unarchive:
+        src: "{{ download_nexus.dest }}"
+        dest: /opt/
+        remote_src: yes
+      when: not stat_result.stat.exists
+
+    - name: Find Nexus directory
+      find: 
+        paths: /opt/
+        patterns: "nexus-*"
+        file_type: directory
+      register: find_result
+    # - debug: msg="{{ find_result }}"
+
+    
+    - name: Rename nexus directory
+      command: mv {{find_result.files[0].path}} /opt/nexus
+      when: not stat_result.stat.exists
+
+- name: Create Nexus user
+  hosts: aws
+  become: true
+  vars_files:
+    - vars
+  tasks:
+
+    - name: Create Nexus group
+      group:
+        name: nexus
+        state: present
+
+    - name: Create Nexus user
+      user:
+        name: nexus
+        comment: Nexus User
+        group: nexus
+        password: "{{ nexus_user_password | password_hash('sha512') }}"
+
+# replaces: chown -R nexus:nexus nexus-3.65.0-02
+    - name: Change Nexus directory owner
+      file:
+        path: /opt/nexus
+        owner: nexus
+        group: nexus
+        state: directory
+        recurse: yes
+
+    - name: Change sonatype directory owner
+      file:
+        path: /opt/sonatype-work
+        owner: nexus
+        group: nexus
+        state: directory
+        recurse: yes
+  
+- name: Start nexus with nexus user
+  hosts: aws
+  become: True
+  become_user: nexus
+  tasks:
+    # - name: Set JAVA verson for nexus
+    #   lineinfile: 
+    #     path: /opt/nexus/bin/nexus
+    #     regexp: '^# INSTALL4J_JAVA_HOME_OVERRIDE='
+    #     line: INSTALL4J_JAVA_HOME_OVERRIDE="/usr/lib/jvm/java-8-openjdk-amd64"
+
+    - name: Set run_as_user nexus
+      lineinfile: 
+        path: /opt/nexus/bin/nexus.rc
+        regexp: '^#run_as_user=""'
+        line: run_as_user="nexus"
+    - name: Start nexus
+      command: /opt/nexus/bin/nexus start
+
+
+- name: Verify nexus running
+  hosts: aws
+  tasks:
+    - name: Check with ps
+      shell: ps aux | grep nexus
+      register: app_status
+    - debug: msg={{app_status.stdout_lines}}
+    - name: Wait one minute
+      pause:
+        minutes: 1 
+    - name: Check with netstat
+      shell: netstat -plnt
+      register: app_status
+    - debug: msg={{app_status.stdout_lines}}
