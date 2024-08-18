@@ -1,0 +1,12 @@
+---
+- name: Install Docker
+  hosts: aws_amazon_ami
+  become: true
+  tasks:
+    - name: yum install docker
+      yum:
+        name: docker
+        update_cache: yes
+        state: present
+
+    # - name: start docker
