@@ -1,6 +1,6 @@
 
 ping:
-	ansible aws -i hosts -m ping
+	ansible aws_amazon_ami -m ping
 
 nginx:
 	ansible-playbook -i hosts playbooks/nginx.yaml
@@ -13,4 +13,7 @@ deploy_node_app: build_app
 
 deploy_nexus:
 	ansible-playbook playbooks/nexus.yaml
+
+deploy_docker:
+	ansible-playbook playbooks/docker.yaml
 
