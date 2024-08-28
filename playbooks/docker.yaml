@@ -1,6 +1,22 @@
 ---
+- name: Wait for SSH connection
+  hosts: aws_ec2
+  gather_facts: False
+  tasks:
+    - name: Ensure SSH port open
+      wait_for:
+        port: 22
+        delay: 10
+        timeout: 100
+        search_regex: OpenSSH
+        host: '{{ (ansible_ssh_host|default(ansible_host))|default(inventory_hostname) }}'
+      vars:
+        ansible_connection: local
+        ansible_python_interpreter: /usr/bin/python3
+
+
 - name: Install Docker
-  hosts: aws_amazon_ami
+  hosts: aws_ec2
   become: true
   tasks:
     - name: Install Docker
@@ -14,7 +30,7 @@
         state: started
 
 - name: Install Docker-compose
-  hosts: aws_amazon_ami
+  hosts: aws_ec2
   tasks:
     - name: Create docker-compose directory
       file:
@@ -30,7 +46,7 @@
         mode: +x
 
 - name: Add ec2-user to docker group
-  hosts: aws_amazon_ami
+  hosts: aws_ec2
   become: true
   tasks: 
     - name: Add ec2-user to docker group
@@ -42,7 +58,7 @@
       meta: reset_connection
 
 - name: Start docker containers
-  hosts: aws_amazon_ami
+  hosts: aws_ec2
   vars_files:
     - vars
   tasks:

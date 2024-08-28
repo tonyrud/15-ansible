@@ -15,5 +15,10 @@ deploy_nexus:
 	ansible-playbook playbooks/nexus.yaml
 
 deploy_docker:
-	ansible-playbook playbooks/docker.yaml
+	ansible-playbook -i inventory_aws_ec2.yaml playbooks/docker.yaml
+
+plugin_inventory:
+	ansible-inventory -i inventory_aws_ec2.yaml --list
+
+
 
