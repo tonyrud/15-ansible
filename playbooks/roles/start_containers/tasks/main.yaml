@@ -1,0 +1,11 @@
+- name: Copy docker compose 
+  copy:
+    src: /Users/tonyrudny/Developer/DevOps/techdegree-with-nana/15_ansible/docker-compose-full.yaml
+    dest: /home/ec2-user/docker-compose.yaml
+- name: Docker login
+  docker_login:
+    username: tonyrudny
+    password: "{{ docker_password }}"
+- name: Start containers from compose
+  community.docker.docker_compose_v2:
+    project_src: /home/ec2-user
