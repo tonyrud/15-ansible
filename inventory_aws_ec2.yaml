@@ -5,4 +5,4 @@ regions:
 
 filters:
   tag:Name: 
-    - "15-ansible-docker-compose*"
+    - "15-ansible*"
